@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thinking Out Loud</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a class="brand-mark" href="/" aria-label="Thinking Out Loud home">
+          <span class="brand-symbol">TOL</span>
+          <span>Thinking Out Loud</span>
+        </a>
+        <div class="nav-links" aria-label="Product sections">
+          <span>Transcription</span>
+          <span>Neural voice</span>
+          <span>Idea protocol</span>
+        </div>
+        <div class="nav-actions">
+          <span class="nav-login">Console</span>
+          <button class="nav-cta" type="button" id="navRecordButton">Start session</button>
+        </div>
+      </nav>
+
+      <section class="workspace" aria-label="Thinking Out Loud workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">// Voice-to-idea cloud //</p>
+            <h1>Speech infrastructure for organized thinking.</h1>
+            <p class="hero-copy">
+              Speak without editing yourself. Thinking Out Loud captures the raw signal, structures the thought, and returns an AI answer through Microsoft neural voices.
+            </p>
+          </div>
+          <aside class="agent-terminal" aria-label="System diagnostics">
+            <p>// Thinking Agent Terminal //</p>
+            <pre><span>&gt;</span> Session ID: local</pre>
+            <pre><span>&gt;</span> [OK] Human speech interface detected</pre>
+            <pre><span>&gt;</span> [OK] Multilingual voice matrix loaded</pre>
+            <pre><span>&gt;</span> <strong id="systemStatus">Checking services</strong></pre>
+          </aside>
+        </header>
+
+        <section class="control-panel" aria-label="Voice controls">
+          <div class="voice-orb" id="voiceOrb">
+            <span></span>
+          </div>
+          <div class="primary-actions">
+            <button id="recordButton" class="record-button" type="button">
+              <span class="record-dot"></span>
+              Launch voice session
+            </button>
+            <button id="stopButton" class="icon-button" type="button" aria-label="Stop recording" title="Stop recording" disabled>
+              STOP
+            </button>
+          </div>
+          <p id="recordingState" class="recording-state">Choose a language, then press start.</p>
+        </section>
+
+        <section class="settings-grid" aria-label="Language and voice settings">
+          <label>
+            Recognition language
+            <select id="languageSelect"></select>
+          </label>
+          <label>
+            Microsoft neural voice
+            <select id="voiceSelect"></select>
+          </label>
+          <label>
+            Response tone
+            <select id="toneSelect">
+              <option value="thoughtful">Thoughtful</option>
+              <option value="direct">Direct</option>
+              <option value="warm">Warm</option>
+              <option value="executive">Executive</option>
+              <option value="creative">Creative</option>
+            </select>
+          </label>
+          <label class="toggle-line">
+            <input type="checkbox" id="autoSpeak" checked />
+            Speak AI answer aloud
+          </label>
+        </section>
+
+        <section class="content-grid">
+          <article class="panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-index">01</p>
+                <h2>Raw Transcript</h2>
+              </div>
+              <div class="panel-actions">
+                <button id="organizeButton" class="text-button" type="button">Organize</button>
+                <button id="clearButton" class="text-button" type="button">Clear</button>
+              </div>
+            </div>
+            <textarea id="transcript" placeholder="Your spoken thoughts will appear here..."></textarea>
+          </article>
+
+          <article class="panel result-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="panel-index">02</p>
+                <h2>Organized Idea</h2>
+              </div>
+              <button id="speakButton" class="text-button" type="button" disabled>Speak</button>
+            </div>
+            <div id="result" class="result empty-state">
+              Your formatted idea and AI response will appear after you finish speaking.
+            </div>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
