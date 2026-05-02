@@ -1,7 +1,7 @@
 {
   "name": "thinking-out-loud",
   "version": "1.0.0",
-  "description": "Voice-first idea organizer with AI responses and Microsoft neural voice playback.",
+  "description": "Voice-first thought structuring app with rolling context memory and PDF reports.",
   "main": "server.js",
   "scripts": {
     "build": "node build.js",
@@ -12,9 +12,13 @@
     "node": ">=18"
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "openai": "^4.78.1"
+    "helmet": "^8.1.0",
+    "openai": "^4.78.1",
+    "pdfkit": "^0.18.0",
+    "zod": "^3.25.76"
   }
 }

@@ -1,12 +1,14 @@
 # Thinking Out Loud
 
-A voice-first web app for speaking freely into the microphone, automatically transcribing the thought, organizing it with AI, and reading the answer back with Microsoft Azure neural voices.
+A voice-first web app for speaking freely into the microphone, automatically transcribing the thought, structuring its logic, and producing a complete book-like PDF report.
 
 ## Features
 
-- Browser microphone dictation with automatic processing when recording ends.
-- AI organization into title, summary, structured thought, action items, and useful questions.
-- Microsoft Azure neural voice playback.
+- Browser microphone dictation with a 5-minute maximum recording limit.
+- Thought structuring into context, thesis, logic map, assumptions, accuracy notes, contradictions, open questions, and action plan.
+- Book-like PDF report generation with prologue, table of contents, chapters, conclusion, and transcript excerpt.
+- Rolling server memory that references the previous recording while keeping only a small short-lived cache.
+- Production-friendly open-source stack: Express, Helmet, compression, Zod, PDFKit, and optional OpenAI reasoning.
 - Language and accent presets for English, French, Romanian, Spanish, Chinese, Japanese, Hungarian, Portuguese, Russian, Arabic, Hindi, German, Korean, and Italian.
 - Browser speech synthesis fallback when Azure credentials are not configured.
 - Local formatter fallback when `OPENAI_API_KEY` is not configured.
@@ -26,12 +28,21 @@ Open `http://localhost:3000`.
 Add these in Hostinger's Node.js app environment settings or in a `.env` file on the server:
 
 ```bash
-OPENAI_API_KEY=your_openai_key
+OPENAI_API_KEY=your_openai_key_optional
 OPENAI_MODEL=gpt-4o-mini
-AZURE_SPEECH_KEY=your_azure_speech_key
-AZURE_SPEECH_REGION=eastus
 PORT=3000
 ```
+
+`OPENAI_API_KEY` is optional. Without it, the app uses the local thought-structure engine.
+
+## Memory Model
+
+The server keeps a tiny rolling cache per browser client:
+
+- Maximum 3 recent structured reports.
+- Cache expires after 6 hours.
+- The next report can reference the previous recording for continuity.
+- Full transcripts are not stored long-term by the app.
 
 ## Hostinger Deployment Notes
 
@@ -45,10 +56,10 @@ Use the domain `https://tuntunsahur.com` or `https://www.tuntunsahur.com`.
 6. Add the environment variables above.
 7. Start or restart the Node.js app.
 
-The app serves the frontend and backend from the same process. The `npm run build` command copies frontend assets to both `build/` and `dist/` for hosts that require an output directory.
+The app serves the frontend and backend from the same process, so no separate build step is required.
 
 ## Security Notes
 
-- Do not place Azure Speech or OpenAI keys in frontend files.
-- `/api/speech-token` returns short-lived Azure authorization tokens so the browser never sees the Azure subscription key.
+- Do not place OpenAI keys in frontend files.
+- The PDF report is generated server-side and streamed back to the browser.
 - Microphone access requires HTTPS in production. Your Hostinger domain already uses HTTPS.
