@@ -18,8 +18,8 @@
         </a>
         <div class="nav-links" aria-label="Product sections">
           <span>Transcription</span>
-          <span>Neural voice</span>
-          <span>Idea protocol</span>
+          <span>Logic map</span>
+          <span>PDF report</span>
         </div>
         <div class="nav-actions">
           <span class="nav-login">Console</span>
@@ -30,17 +30,17 @@
       <section class="workspace" aria-label="Thinking Out Loud workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">// Voice-to-idea cloud //</p>
-            <h1>Speech infrastructure for organized thinking.</h1>
+            <p class="eyebrow">// Thought-to-book protocol //</p>
+            <h1>Structured thinking, captured as a report.</h1>
             <p class="hero-copy">
-              Speak without editing yourself. Thinking Out Loud captures the raw signal, structures the thought, and returns an AI answer through Microsoft neural voices.
+              Speak for up to five minutes. Thinking Out Loud extracts context, logic, assumptions, tensions, and continuity from your last recording, then turns the result into a book-like PDF.
             </p>
           </div>
           <aside class="agent-terminal" aria-label="System diagnostics">
             <p>// Thinking Agent Terminal //</p>
             <pre><span>&gt;</span> Session ID: local</pre>
             <pre><span>&gt;</span> [OK] Human speech interface detected</pre>
-            <pre><span>&gt;</span> [OK] Multilingual voice matrix loaded</pre>
+            <pre><span>&gt;</span> [OK] Rolling memory cache: 3 reports / 6 hours</pre>
             <pre><span>&gt;</span> <strong id="systemStatus">Checking services</strong></pre>
           </aside>
         </header>
@@ -52,13 +52,14 @@
           <div class="primary-actions">
             <button id="recordButton" class="record-button" type="button">
               <span class="record-dot"></span>
-              Launch voice session
+              Start 5-minute recording
             </button>
             <button id="stopButton" class="icon-button" type="button" aria-label="Stop recording" title="Stop recording" disabled>
               STOP
             </button>
           </div>
-          <p id="recordingState" class="recording-state">Choose a language, then press start.</p>
+          <p id="recordingState" class="recording-state">Press start. The session stops automatically at 5:00.</p>
+          <div class="timer-readout" id="timerReadout">05:00</div>
         </section>
 
         <section class="settings-grid" aria-label="Language and voice settings">
@@ -67,23 +68,19 @@
             <select id="languageSelect"></select>
           </label>
           <label>
-            Microsoft neural voice
-            <select id="voiceSelect"></select>
-          </label>
-          <label>
-            Response tone
+            Report tone
             <select id="toneSelect">
-              <option value="thoughtful">Thoughtful</option>
+              <option value="clear">Clear</option>
               <option value="direct">Direct</option>
-              <option value="warm">Warm</option>
-              <option value="executive">Executive</option>
-              <option value="creative">Creative</option>
+              <option value="analytical">Analytical</option>
+              <option value="bookish">Book-like</option>
+              <option value="strategic">Strategic</option>
             </select>
           </label>
-          <label class="toggle-line">
-            <input type="checkbox" id="autoSpeak" checked />
-            Speak AI answer aloud
-          </label>
+          <div class="memory-card">
+            <span>Rolling memory</span>
+            <strong id="memoryStatus">No previous recording</strong>
+          </div>
         </section>
 
         <section class="content-grid">
@@ -94,7 +91,7 @@
                 <h2>Raw Transcript</h2>
               </div>
               <div class="panel-actions">
-                <button id="organizeButton" class="text-button" type="button">Organize</button>
+                <button id="organizeButton" class="text-button" type="button">Structure</button>
                 <button id="clearButton" class="text-button" type="button">Clear</button>
               </div>
             </div>
@@ -105,19 +102,18 @@
             <div class="panel-heading">
               <div>
                 <p class="panel-index">02</p>
-                <h2>Organized Idea</h2>
+                <h2>Thought Report</h2>
               </div>
-              <button id="speakButton" class="text-button" type="button" disabled>Speak</button>
+              <button id="downloadPdfButton" class="text-button" type="button" disabled>Download PDF</button>
             </div>
             <div id="result" class="result empty-state">
-              Your formatted idea and AI response will appear after you finish speaking.
+              Your structured report will appear after you finish speaking.
             </div>
           </article>
         </section>
       </section>
     </main>
 
-    <script src="https://aka.ms/csspeech/jsbrowserpackageraw"></script>
     <script src="/app.js" type="module"></script>
   </body>
 </html>

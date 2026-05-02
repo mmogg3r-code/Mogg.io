@@ -1,157 +1,49 @@
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MAX_RECORDING_SECONDS = 300;
 
 const languages = [
-  {
-    name: "English",
-    recognition: "en-US",
-    voices: [
-      ["English - United States - Jenny", "en-US-JennyNeural"],
-      ["English - United States - Guy", "en-US-GuyNeural"],
-      ["English - United Kingdom - Libby", "en-GB-LibbyNeural"],
-      ["English - Australia - Natasha", "en-AU-NatashaNeural"],
-      ["English - Canada - Clara", "en-CA-ClaraNeural"],
-      ["English - India - Neerja", "en-IN-NeerjaNeural"],
-    ],
-  },
-  {
-    name: "French",
-    recognition: "fr-FR",
-    voices: [
-      ["French - France - Denise", "fr-FR-DeniseNeural"],
-      ["French - France - Henri", "fr-FR-HenriNeural"],
-      ["French - Canada - Sylvie", "fr-CA-SylvieNeural"],
-      ["French - Switzerland - Ariane", "fr-CH-ArianeNeural"],
-    ],
-  },
-  {
-    name: "Romanian",
-    recognition: "ro-RO",
-    voices: [
-      ["Romanian - Romania - Alina", "ro-RO-AlinaNeural"],
-      ["Romanian - Romania - Emil", "ro-RO-EmilNeural"],
-    ],
-  },
-  {
-    name: "Spanish",
-    recognition: "es-ES",
-    voices: [
-      ["Spanish - Spain - Elvira", "es-ES-ElviraNeural"],
-      ["Spanish - Mexico - Dalia", "es-MX-DaliaNeural"],
-      ["Spanish - United States - Paloma", "es-US-PalomaNeural"],
-      ["Spanish - Argentina - Elena", "es-AR-ElenaNeural"],
-      ["Spanish - Colombia - Salome", "es-CO-SalomeNeural"],
-    ],
-  },
-  {
-    name: "Chinese",
-    recognition: "zh-CN",
-    voices: [
-      ["Chinese - Mandarin Mainland - Xiaoxiao", "zh-CN-XiaoxiaoNeural"],
-      ["Chinese - Mandarin Mainland - Yunxi", "zh-CN-YunxiNeural"],
-      ["Chinese - Hong Kong Cantonese - HiuMaan", "zh-HK-HiuMaanNeural"],
-      ["Chinese - Taiwan Mandarin - HsiaoChen", "zh-TW-HsiaoChenNeural"],
-    ],
-  },
-  {
-    name: "Japanese",
-    recognition: "ja-JP",
-    voices: [
-      ["Japanese - Nanami", "ja-JP-NanamiNeural"],
-      ["Japanese - Keita", "ja-JP-KeitaNeural"],
-    ],
-  },
-  {
-    name: "Hungarian",
-    recognition: "hu-HU",
-    voices: [
-      ["Hungarian - Noemi", "hu-HU-NoemiNeural"],
-      ["Hungarian - Tamas", "hu-HU-TamasNeural"],
-    ],
-  },
-  {
-    name: "Portuguese",
-    recognition: "pt-BR",
-    voices: [
-      ["Portuguese - Brazil - Francisca", "pt-BR-FranciscaNeural"],
-      ["Portuguese - Brazil - Antonio", "pt-BR-AntonioNeural"],
-      ["Portuguese - Portugal - Raquel", "pt-PT-RaquelNeural"],
-    ],
-  },
-  {
-    name: "Russian",
-    recognition: "ru-RU",
-    voices: [
-      ["Russian - Svetlana", "ru-RU-SvetlanaNeural"],
-      ["Russian - Dmitry", "ru-RU-DmitryNeural"],
-    ],
-  },
-  {
-    name: "Arabic",
-    recognition: "ar-SA",
-    voices: [
-      ["Arabic - Saudi Arabia - Zariyah", "ar-SA-ZariyahNeural"],
-      ["Arabic - Egypt - Salma", "ar-EG-SalmaNeural"],
-      ["Arabic - UAE - Fatima", "ar-AE-FatimaNeural"],
-    ],
-  },
-  {
-    name: "Hindi",
-    recognition: "hi-IN",
-    voices: [
-      ["Hindi - Swara", "hi-IN-SwaraNeural"],
-      ["Hindi - Madhur", "hi-IN-MadhurNeural"],
-    ],
-  },
-  {
-    name: "German",
-    recognition: "de-DE",
-    voices: [
-      ["German - Germany - Katja", "de-DE-KatjaNeural"],
-      ["German - Germany - Conrad", "de-DE-ConradNeural"],
-      ["German - Austria - Ingrid", "de-AT-IngridNeural"],
-    ],
-  },
-  {
-    name: "Korean",
-    recognition: "ko-KR",
-    voices: [
-      ["Korean - SunHi", "ko-KR-SunHiNeural"],
-      ["Korean - InJoon", "ko-KR-InJoonNeural"],
-    ],
-  },
-  {
-    name: "Italian",
-    recognition: "it-IT",
-    voices: [
-      ["Italian - Elsa", "it-IT-ElsaNeural"],
-      ["Italian - Diego", "it-IT-DiegoNeural"],
-    ],
-  },
+  ["English", "en-US"],
+  ["French", "fr-FR"],
+  ["Romanian", "ro-RO"],
+  ["Spanish", "es-ES"],
+  ["Chinese", "zh-CN"],
+  ["Japanese", "ja-JP"],
+  ["Hungarian", "hu-HU"],
+  ["Portuguese", "pt-BR"],
+  ["Russian", "ru-RU"],
+  ["Arabic", "ar-SA"],
+  ["Hindi", "hi-IN"],
+  ["German", "de-DE"],
+  ["Korean", "ko-KR"],
+  ["Italian", "it-IT"],
 ];
 
 const state = {
   recognition: null,
   finalTranscript: "",
-  lastSpokenText: "",
   isRecording: false,
+  startedAt: 0,
+  timerId: null,
+  currentReport: null,
+  clientId: getClientId(),
 };
 
 const elements = {
-  autoSpeak: document.querySelector("#autoSpeak"),
   clearButton: document.querySelector("#clearButton"),
+  downloadPdfButton: document.querySelector("#downloadPdfButton"),
   languageSelect: document.querySelector("#languageSelect"),
-  organizeButton: document.querySelector("#organizeButton"),
+  memoryStatus: document.querySelector("#memoryStatus"),
   navRecordButton: document.querySelector("#navRecordButton"),
+  organizeButton: document.querySelector("#organizeButton"),
   recordButton: document.querySelector("#recordButton"),
   recordingState: document.querySelector("#recordingState"),
   result: document.querySelector("#result"),
-  speakButton: document.querySelector("#speakButton"),
   stopButton: document.querySelector("#stopButton"),
   systemStatus: document.querySelector("#systemStatus"),
+  timerReadout: document.querySelector("#timerReadout"),
   toneSelect: document.querySelector("#toneSelect"),
   transcript: document.querySelector("#transcript"),
   voiceOrb: document.querySelector("#voiceOrb"),
-  voiceSelect: document.querySelector("#voiceSelect"),
 };
 
 init();
@@ -159,51 +51,39 @@ init();
 async function init() {
   populateLanguages();
   bindEvents();
+  updateMemoryStatus();
+  updateTimer(MAX_RECORDING_SECONDS);
   await checkStatus();
 
   if (!SpeechRecognition) {
     setStatus("Browser speech recognition unavailable", "warn");
     elements.recordButton.disabled = true;
+    elements.navRecordButton.disabled = true;
     elements.recordingState.textContent = "Use Chrome or Edge for microphone dictation.";
   }
 }
 
 function populateLanguages() {
   elements.languageSelect.innerHTML = languages
-    .map((language, index) => `<option value="${index}">${language.name}</option>`)
-    .join("");
-  updateVoices();
-}
-
-function updateVoices() {
-  const language = getSelectedLanguage();
-  elements.voiceSelect.innerHTML = language.voices
-    .map(([label, id]) => `<option value="${id}">${label}</option>`)
+    .map(([name], index) => `<option value="${index}">${name}</option>`)
     .join("");
 }
 
 function bindEvents() {
-  elements.languageSelect.addEventListener("change", () => {
-    updateVoices();
-    if (state.recognition) {
-      state.recognition.lang = getSelectedLanguage().recognition;
-    }
-  });
-
   elements.recordButton.addEventListener("click", startRecording);
   elements.navRecordButton.addEventListener("click", startRecording);
   elements.stopButton.addEventListener("click", stopRecording);
   elements.organizeButton.addEventListener("click", () => {
     const transcript = elements.transcript.value.trim();
     if (transcript) {
-      elements.recordingState.textContent = "Organizing your idea...";
+      elements.recordingState.textContent = "Structuring your thought report...";
       organizeTranscript(transcript);
     } else {
       elements.recordingState.textContent = "Add a transcript or speak first.";
     }
   });
   elements.clearButton.addEventListener("click", clearAll);
-  elements.speakButton.addEventListener("click", () => speakText(state.lastSpokenText));
+  elements.downloadPdfButton.addEventListener("click", downloadPdf);
 }
 
 async function checkStatus() {
@@ -211,9 +91,9 @@ async function checkStatus() {
     const response = await fetch("/api/health");
     const status = await response.json();
     const parts = [];
-    parts.push(status.aiConfigured ? "AI ready" : "AI offline");
-    parts.push(status.azureSpeechConfigured ? "Azure voice ready" : "Azure voice missing");
-    setStatus(parts.join(" | "), status.aiConfigured && status.azureSpeechConfigured ? "ok" : "warn");
+    parts.push(status.aiConfigured ? "AI reasoning ready" : "local reasoning mode");
+    parts.push(`memory ${status.memory?.maxItemsPerClient || 3} reports`);
+    setStatus(parts.join(" | "), "ok");
   } catch {
     setStatus("Service check unavailable", "warn");
   }
@@ -224,16 +104,19 @@ function startRecording() {
 
   state.finalTranscript = elements.transcript.value.trim();
   state.recognition = new SpeechRecognition();
-  state.recognition.lang = getSelectedLanguage().recognition;
+  state.recognition.lang = getSelectedLanguage().code;
   state.recognition.continuous = true;
   state.recognition.interimResults = true;
 
   state.recognition.onstart = () => {
     state.isRecording = true;
+    state.startedAt = Date.now();
     elements.voiceOrb.classList.add("listening");
     elements.recordButton.disabled = true;
+    elements.navRecordButton.disabled = true;
     elements.stopButton.disabled = false;
-    elements.recordingState.textContent = "Listening. Pause or press stop when your thought is complete.";
+    elements.recordingState.textContent = "Recording. Stop when done, or wait for the 5-minute cap.";
+    state.timerId = window.setInterval(tickTimer, 250);
   };
 
   state.recognition.onresult = (event) => {
@@ -254,14 +137,10 @@ function startRecording() {
   };
 
   state.recognition.onend = async () => {
+    finishRecordingUi();
     const transcript = elements.transcript.value.trim();
-    state.isRecording = false;
-    elements.voiceOrb.classList.remove("listening");
-    elements.recordButton.disabled = false;
-    elements.stopButton.disabled = true;
-
     if (transcript) {
-      elements.recordingState.textContent = "Organizing your idea...";
+      elements.recordingState.textContent = "Structuring your thought report...";
       await organizeTranscript(transcript);
     } else {
       elements.recordingState.textContent = "No speech captured yet.";
@@ -271,10 +150,32 @@ function startRecording() {
   state.recognition.start();
 }
 
+function tickTimer() {
+  const elapsed = Math.floor((Date.now() - state.startedAt) / 1000);
+  const remaining = Math.max(0, MAX_RECORDING_SECONDS - elapsed);
+  updateTimer(remaining);
+  if (remaining <= 0) stopRecording();
+}
+
+function updateTimer(seconds) {
+  const minutes = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const rest = String(seconds % 60).padStart(2, "0");
+  elements.timerReadout.textContent = `${minutes}:${rest}`;
+}
+
 function stopRecording() {
-  if (state.recognition && state.isRecording) {
-    state.recognition.stop();
-  }
+  if (state.recognition && state.isRecording) state.recognition.stop();
+}
+
+function finishRecordingUi() {
+  state.isRecording = false;
+  window.clearInterval(state.timerId);
+  state.timerId = null;
+  updateTimer(MAX_RECORDING_SECONDS);
+  elements.voiceOrb.classList.remove("listening");
+  elements.recordButton.disabled = false;
+  elements.navRecordButton.disabled = false;
+  elements.stopButton.disabled = true;
 }
 
 async function organizeTranscript(transcript) {
@@ -284,101 +185,122 @@ async function organizeTranscript(transcript) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         transcript,
+        clientId: state.clientId,
         language: getSelectedLanguage().name,
         tone: elements.toneSelect.value,
       }),
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Unable to organize transcript.");
+    if (!response.ok) throw new Error(data.error || "Unable to structure transcript.");
 
-    renderResult(data);
-    state.lastSpokenText = data.spokenResponse || data.summary || data.organizedIdea;
-    elements.speakButton.disabled = !state.lastSpokenText;
-    elements.recordingState.textContent = data.source === "offline" ? "Organized locally." : "Organized by AI.";
-
-    if (elements.autoSpeak.checked && state.lastSpokenText) {
-      await speakText(state.lastSpokenText);
-    }
+    state.currentReport = data;
+    rememberLocally(data);
+    renderReport(data);
+    updateMemoryStatus();
+    elements.downloadPdfButton.disabled = false;
+    elements.recordingState.textContent = data.source === "local" ? "Structured locally. PDF is ready." : "Structured with AI. PDF is ready.";
   } catch (error) {
     elements.recordingState.textContent = error.message;
   }
 }
 
-function renderResult(data) {
-  const actions = data.actionItems?.length
-    ? `<h4>Action Items</h4><ul>${data.actionItems.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-    : "";
-  const questions = data.questions?.length
-    ? `<h4>Useful Questions</h4><ul>${data.questions.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-    : "";
+function renderReport(report) {
+  const list = (title, items) =>
+    items?.length ? `<h4>${escapeHtml(title)}</h4><ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>` : "";
 
   elements.result.classList.remove("empty-state");
   elements.result.innerHTML = `
-    <h3>${escapeHtml(data.title || "Organized Idea")}</h3>
-    <p>${escapeHtml(data.summary || "")}</p>
-    <h4>Structured Thought</h4>
-    <p>${escapeHtml(data.organizedIdea || "")}</p>
-    ${actions}
-    ${questions}
+    <h3>${escapeHtml(report.title)}</h3>
+    <div class="thought-meta">
+      <span>Type: ${escapeHtml(report.thoughtType || "Exploration")}</span>
+      <span>Source: ${escapeHtml(report.source || "local")}</span>
+      <span>Generated: ${escapeHtml(new Date(report.generatedAt).toLocaleString())}</span>
+    </div>
+    <h4>Prologue</h4>
+    <p>${escapeHtml(report.prologue || "")}</p>
+    <h4>Context</h4>
+    <p>${escapeHtml(report.context || "")}</p>
+    <h4>Core Thesis</h4>
+    <p>${escapeHtml(report.coreThesis || "")}</p>
+    ${list("Logic Map", report.logicMap)}
+    ${list("Assumptions", report.assumptions)}
+    ${list("Accuracy Notes", report.accuracyNotes)}
+    ${list("Contradictions or Tensions", report.contradictions)}
+    ${list("Open Questions", report.openQuestions)}
+    ${list("Action Plan", report.actionPlan)}
+    <h4>Conclusion</h4>
+    <p>${escapeHtml(report.conclusion || "")}</p>
   `;
 }
 
-async function speakText(text) {
-  if (!text) return;
+async function downloadPdf() {
+  if (!state.currentReport) return;
 
-  if (!window.SpeechSDK) {
-    speakWithBrowser(text);
+  const response = await fetch("/api/report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      report: state.currentReport,
+      clientId: state.clientId,
+      transcript: elements.transcript.value,
+    }),
+  });
+
+  if (!response.ok) {
+    elements.recordingState.textContent = "PDF generation failed.";
     return;
   }
 
-  try {
-    const response = await fetch("/api/speech-token");
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Azure Speech unavailable.");
-
-    const speechConfig = window.SpeechSDK.SpeechConfig.fromAuthorizationToken(data.token, data.region);
-    speechConfig.speechSynthesisVoiceName = elements.voiceSelect.value;
-    const synthesizer = new window.SpeechSDK.SpeechSynthesizer(speechConfig);
-
-    await new Promise((resolve, reject) => {
-      synthesizer.speakTextAsync(
-        text,
-        () => {
-          synthesizer.close();
-          resolve();
-        },
-        (error) => {
-          synthesizer.close();
-          reject(error);
-        }
-      );
-    });
-  } catch (error) {
-    console.warn(error);
-    speakWithBrowser(text);
-  }
-}
-
-function speakWithBrowser(text) {
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = getSelectedLanguage().recognition;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = `${slugify(state.currentReport.title || "thought-report")}.pdf`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 function clearAll() {
   elements.transcript.value = "";
   state.finalTranscript = "";
-  state.lastSpokenText = "";
-  elements.speakButton.disabled = true;
+  state.currentReport = null;
+  elements.downloadPdfButton.disabled = true;
   elements.result.classList.add("empty-state");
-  elements.result.textContent = "Your formatted idea and AI response will appear after you finish speaking.";
-  elements.recordingState.textContent = "Choose a language, then press start.";
+  elements.result.textContent = "Your structured report will appear after you finish speaking.";
+  elements.recordingState.textContent = "Press start. The session stops automatically at 5:00.";
+}
+
+function rememberLocally(report) {
+  const items = JSON.parse(localStorage.getItem("tol_memory") || "[]");
+  items.push({
+    title: report.title,
+    coreThesis: report.coreThesis,
+    generatedAt: report.generatedAt,
+  });
+  localStorage.setItem("tol_memory", JSON.stringify(items.slice(-3)));
+}
+
+function updateMemoryStatus() {
+  const items = JSON.parse(localStorage.getItem("tol_memory") || "[]");
+  elements.memoryStatus.textContent = items.length
+    ? `${items.length} cached; last: ${items.at(-1).title}`
+    : "No previous recording";
 }
 
 function getSelectedLanguage() {
-  return languages[Number(elements.languageSelect.value)] || languages[0];
+  const [name, code] = languages[Number(elements.languageSelect.value)] || languages[0];
+  return { name, code };
+}
+
+function getClientId() {
+  const existing = localStorage.getItem("tol_client_id");
+  if (existing) return existing;
+  const value = crypto.randomUUID ? crypto.randomUUID() : `client-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem("tol_client_id", value);
+  return value;
 }
 
 function setStatus(text, kind) {
@@ -386,8 +308,16 @@ function setStatus(text, kind) {
   elements.systemStatus.dataset.kind = kind;
 }
 
+function slugify(value) {
+  return String(value || "report")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 80);
+}
+
 function escapeHtml(value) {
-  return String(value)
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
